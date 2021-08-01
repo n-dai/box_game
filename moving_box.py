@@ -4,7 +4,6 @@ import random
 import time
 import webcolors
 import scipy
-import sched
 
 from pygame.ftfont import SysFont
 
@@ -198,9 +197,10 @@ class Window:
     
     def score_deduction(self):
         
-        if float(time.time() - self.score_deduct_time) > 0.8:
-            self.score -= 5
-            self.score_deduct_time = time.time()
+        if key.initial_press > 0:
+            if float(time.time() - self.score_deduct_time) > 0.8:
+                self.score -= 5
+                self.score_deduct_time = time.time()
         
 
     # Function to handle game state when colour is successfully hit
@@ -213,7 +213,7 @@ class Window:
             self.score += 10
         
         # If object 2 or 3 is hit, the game will prompt wrong colour
-        if self.collision_detect() == 2 or self.collision_detect() == 3:
+        if (self.collision_detect() == 2 or self.collision_detect() == 3) and key.initial_press > 0:
             self.initial_text = "Wrong Colour"
             self.score_deduction()
     
@@ -231,7 +231,6 @@ class Window:
         self.random_shapes()
     
     # Function to handle the game loop
-
     def game_loop(self):
         
         running = True
@@ -265,7 +264,7 @@ class Keyboard:
     # Variable will track if 'Y' has has been pressed or not
     initial_press = 0
 
-    # Functio nto handle the key binds
+    # Function to handle the key binds
     def key_bind(self):
 
         keys = game.key.get_pressed()
