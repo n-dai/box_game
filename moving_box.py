@@ -44,6 +44,7 @@ class Window:
     start_text = "Start Game: Press Y to start"
     initial_text = "Hi" 
 
+    # Function to map rgb values to the closest colour names
     def convert_rgb_to_names(self, rgb_tuple):
     
         # a dictionary of all the hex and their respective names in css3
@@ -58,9 +59,11 @@ class Window:
         distance, index = kdt_db.query(rgb_tuple)
         return f'{names[index]}'
 
+    # Initialises pygame
     def pygame_init(self):
         game.init()
 
+    # Creates the main surface
     def window_create(self):
 
         self.pygame_init()
@@ -73,6 +76,7 @@ class Window:
 
         self.random_gen()
 
+    # Creates the player shape
     def shape_create(self):
 
         self.random_shapes()  
@@ -109,6 +113,7 @@ class Window:
         rgb_g_3 = random.randint(0, 255)
         rgb_b_3 = random.randint(0, 255)
 
+    # Function to detect collision with the game objects
     def collision_detect(self):
 
         if self.x_direction > random_x_1 - 10 and self.x_direction < random_x_1 + 30: 
@@ -158,13 +163,14 @@ class Window:
 
         game.display.flip()
 
-
+    # Function to iniliase the on-screen text
     def instructions_display_init(self):
         game.font.init()
         instruction_font = game.font.SysFont("Calibri", 32)
         instruction_text = instruction_font.render(self.initial_text, True, self.white)
         self.screen.blit(instruction_text, (self.x_origin - int(6 * len(self.initial_text)), self.screen_min_height + 20))
     
+    # Function to handle the text displayed
     def instructions_display(self):
         
         name_colour = box.convert_rgb_to_names((rgb_r_1, rgb_g_1, rgb_b_1))
@@ -172,15 +178,19 @@ class Window:
         if key.initial_press > 0:
             self.initial_text = "Go to colour " + str(name_colour)
     
+    # Function to handle game state when colour is successfully hit
     def colour_hit(self):
 
+        # As we are only tracking object number one, we are only concerned with re-generating the shapes when object 1 is hit
         if self.collision_detect() == 1:
             self.random_gen()
             self.random_shapes()
         
+        # If object 2 or 3 is hit, the game will prompt wrong colour
         if self.collision_detect() == 2 or self.collision_detect() == 3:
             self.initial_text = "Wrong Colour"
     
+    # Function to handle game restart
     def restart_game(self):
 
         self.initial_text = self.start_text
@@ -189,6 +199,8 @@ class Window:
         self.y_direction = self.y_origin
         self.random_gen()
         self.random_shapes()
+    
+    # Function to handle the game loop
 
     def game_loop(self):
         
@@ -217,8 +229,10 @@ class Window:
              
 class Keyboard:
 
+    # Variable will track if 'Y' has has been pressed or not
     initial_press = 0
 
+    # Functio nto handle the key binds
     def key_bind(self):
 
         keys = game.key.get_pressed()
