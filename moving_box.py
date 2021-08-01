@@ -4,6 +4,7 @@ import random
 import time
 import webcolors
 import scipy
+import sched
 
 from pygame.ftfont import SysFont
 
@@ -44,6 +45,13 @@ class Window:
     start_text = "Start Game: Press Y to start"
     initial_text = "Hi" 
 
+    initial_time = 10
+    current_time = 0
+    compared_time = 0
+    countdown_time = initial_time
+
+    score = 0
+    score_deduct_time = time.time()
     # Function to map rgb values to the closest colour names
     def convert_rgb_to_names(self, rgb_tuple):
     
@@ -118,7 +126,8 @@ class Window:
 
         if self.x_direction > random_x_1 - 10 and self.x_direction < random_x_1 + 30: 
             if self.y_direction > random_y_1 - 10 and self.y_direction < random_y_1 + 30:
-               return 1
+                self.countdown_time = self.initial_time
+                return 1
         
         if self.x_direction > random_x_2 - 10 and self.x_direction < random_x_2 + 30: 
             if self.y_direction > random_y_2 - 10  and self.y_direction < random_y_2 + 30 :
@@ -138,46 +147,62 @@ class Window:
         game.draw.rect(self.screen, ((rgb_r_2, rgb_g_2, rgb_b_2)), [random_x_2, random_y_2, 20, 20])
         game.draw.rect(self.screen, ((rgb_r_3, rgb_g_3, rgb_b_3)), [random_x_3, random_y_3, 20, 20])
 
-        # if self.collision_detect() == 1: 
-        #     game.draw.rect(self.screen, ((self.black)), [random_x_1, random_y_1, 20, 20])
-        #     self.shape_1_hit_count += 1
-
-        # if self.collision_detect() == 2:
-        #     game.draw.rect(self.screen, ((self.black)), [random_x_2, random_y_2, 20, 20])
-        #     self.shape_2_hit_count += 1
-        
-        # if self.collision_detect() == 3:
-        #     game.draw.rect(self.screen, ((self.black)), [random_x_3, random_y_3, 20, 20])
-        #     self.shape_3_hit_count += 1
-
-        # if self.shape_1_hit_count > 0:
-        #     game.draw.rect(self.screen, ((self.black)), [random_x_1, random_y_1, 20, 20])
-
-        
-        # if self.shape_2_hit_count > 0:
-        #     game.draw.rect(self.screen, ((self.black)), [random_x_2, random_y_2, 20, 20])
-
-        # if self.shape_3_hit_count > 0:
-        #     game.draw.rect(self.screen, ((self.black)), [random_x_3, random_y_3, 20, 20])
-    
-
         game.display.flip()
 
     # Function to iniliase the on-screen text
     def instructions_display_init(self):
         game.font.init()
-        instruction_font = game.font.SysFont("Calibri", 32)
+        instruction_font = game.font.SysFont("Comic Sans", 32)
         instruction_text = instruction_font.render(self.initial_text, True, self.white)
-        self.screen.blit(instruction_text, (self.x_origin - int(6 * len(self.initial_text)), self.screen_min_height + 20))
+        self.screen.blit(instruction_text, (self.x_origin - int(5 * len(self.initial_text)), self.screen_min_height + 20))
+    
+    def countdown_display_init(self) :
+        game.font.init()
+        instruction_font = game.font.SysFont("Comic Sans", 32)
+        instruction_text = instruction_font.render("Time Remaining:  " + str(self.countdown_time), True, self.white)
+        self.screen.blit(instruction_text, (self.screen_min_width + 20, self.screen_min_height + 20))
+    
+    def score_display_init(self) :
+        game.font.init()
+        instruction_font = game.font.SysFont("Comic Sans", 32)
+        instruction_text = instruction_font.render("Score:  " + str(self.score), True, self.white)
+        self.screen.blit(instruction_text, (self.screen_min_width + 20, self.screen_min_height + 50))
+    
     
     # Function to handle the text displayed
     def instructions_display(self):
         
         name_colour = box.convert_rgb_to_names((rgb_r_1, rgb_g_1, rgb_b_1))
-
+        
         if key.initial_press > 0:
-            self.initial_text = "Go to colour " + str(name_colour)
+            if self.game_over_display() != 1:
+                self.initial_text = "Go to colour " + str(name_colour)
     
+    def countdown_display(self):
+        if key.initial_press > 0:
+            if int(time.time() - self.current_time) != self.compared_time:
+                if self.countdown_time == 0:
+                    if self.game_over_display() != 1:
+                        self.countdown_time = self.initial_time + 1
+                
+                else:
+                    self.countdown_time -= 1
+                    self.compared_time += 1
+
+    # Function to handle the game over, if the player does not hit the desired square in time, the game will end    
+    def game_over_display(self):
+        
+        if self.collision_detect() != 1 and self.countdown_time == 0:
+            self.initial_text = "Game Over, Press R to restart or Q to quit"
+            return 1
+    
+    def score_deduction(self):
+        
+        if float(time.time() - self.score_deduct_time) > 0.8:
+            self.score -= 5
+            self.score_deduct_time = time.time()
+        
+
     # Function to handle game state when colour is successfully hit
     def colour_hit(self):
 
@@ -185,10 +210,12 @@ class Window:
         if self.collision_detect() == 1:
             self.random_gen()
             self.random_shapes()
+            self.score += 10
         
         # If object 2 or 3 is hit, the game will prompt wrong colour
         if self.collision_detect() == 2 or self.collision_detect() == 3:
             self.initial_text = "Wrong Colour"
+            self.score_deduction()
     
     # Function to handle game restart
     def restart_game(self):
@@ -197,6 +224,9 @@ class Window:
         key.initial_press = 0
         self.x_direction = self.x_origin
         self.y_direction = self.y_origin
+        self.countdown_time = self.initial_time
+        self.compared_time = 0
+        self.score = 0
         self.random_gen()
         self.random_shapes()
     
@@ -218,11 +248,14 @@ class Window:
 
             box.screen.fill(box.black)
             box.instructions_display_init()
+            box.countdown_display_init()
             box.instructions_display()
+            box.score_display_init()
+            box.countdown_display()
             key.key_bind()
-            self.collision_detect()
-            self.colour_hit()
-            self.shape_create()
+            box.collision_detect()
+            box.colour_hit()
+            box.shape_create()
 
             game.display.flip()
             game.display.update()
@@ -238,19 +271,19 @@ class Keyboard:
         keys = game.key.get_pressed()
 
         if keys[game.K_a]:
-            if self.initial_press != 0:
+            if self.initial_press != 0 and box.game_over_display() != 1:
                 box.x_direction -= box.velocity
 
         if keys[game.K_d]:
-            if self.initial_press != 0:
+            if self.initial_press != 0 and box.game_over_display() != 1:
                 box.x_direction += box.velocity
 
         if keys[game.K_w]:
-            if self.initial_press != 0:
+            if self.initial_press != 0 and box.game_over_display() != 1:
                 box.y_direction -= box.velocity
 
         if keys[game.K_s]:
-            if self.initial_press != 0:
+            if self.initial_press != 0 and box.game_over_display() != 1:
                 box.y_direction += box.velocity
 
         if keys[game.K_r]:
@@ -258,6 +291,7 @@ class Keyboard:
         
         if keys[game.K_y]:
             self.initial_press += 1
+            box.current_time = time.time()
         
         if keys[game.K_q]:
             game.quit()
