@@ -53,9 +53,12 @@ class Window:
     score_deduct_time = time.time()
 
     stage_count = 0
-    level_count = 0
-    level_it = 0
-    level_time = time.time()
+    level_count = 1
+    level_it = 1
+    level_time = 0
+    level_time_compare = 5
+    level_text_col = white
+    level_monitor = 1
 
     # Function to map rgb values to the closest colour names
     def convert_rgb_to_names(self, rgb_tuple):
@@ -152,7 +155,7 @@ class Window:
         game.draw.rect(self.screen, ((rgb_r_2, rgb_g_2, rgb_b_2)), [random_x_2, random_y_2, 20, 20])
         game.draw.rect(self.screen, ((rgb_r_3, rgb_g_3, rgb_b_3)), [random_x_3, random_y_3, 20, 20])
 
-        game.display.flip()
+        #game.display.flip()
 
     # Function to iniliase the on-screen text
     def instructions_display_init(self):
@@ -177,16 +180,9 @@ class Window:
 
         game.font.init()
         level_font = game.font.SysFont("Comic Sans", 32)
-        level_text = level_font.render("Level " + str(self.level_count), True, self.white)
-
-        if self.level_it != self.level_count:
-            self.level_time = time.time()
-            while int(time.time() - self.level_time) < 5:
-                self.screen.blit(level_text, (self.x_origin, self.y_origin))
-                self.level_it = self.level_count
-            
-
-
+        level_text = level_font.render("Level " + str(self.level_count), True, self.level_text_col)
+        self.screen.blit(level_text, (self.x_origin, self.y_origin))           
+        
     # Function to handle the text displayed
     def instructions_display(self):
         
@@ -199,6 +195,8 @@ class Window:
     def countdown_display(self):
 
         if key.initial_press > 0:
+
+            # Detects if time has ticked over a second
             if int(time.time() - self.current_time) != self.compared_time:
                 if self.countdown_time == 0:
                     if self.game_over_display() != 1:
@@ -215,6 +213,7 @@ class Window:
             self.initial_text = "Game Over, Press R to restart or Q to quit"
             return 1
     
+    # Function to to handle score deduction
     def score_deduction(self):
         
         if key.initial_press > 0:
@@ -233,8 +232,13 @@ class Window:
             self.score += 10
             self.stage_count += 1
 
-            if self.stage_count % 3 == 0 and self.stage_count != 0:
+            if self.stage_count % 2 == 0 and self.stage_count != 0:
                 self.level_count += 1
+                self.initial_time -= 1
+
+            # if self.level_monitor != self.level_count:
+            #     self.initial_time -= 3
+            #     self.level_monitor += 1
         
         # If object 2 or 3 is hit, the game will prompt wrong colour
         if (self.collision_detect() == 2 or self.collision_detect() == 3) and key.initial_press > 0:
@@ -246,10 +250,13 @@ class Window:
 
         self.initial_text = self.start_text
         key.initial_press = 0
+        self.initial_time = 10
         self.x_direction = self.x_origin
         self.y_direction = self.y_origin
         self.countdown_time = self.initial_time
         self.compared_time = 0
+        self.level_count = 1    
+        self.stage_count = 0
         self.score = 0
         self.random_gen()
         self.random_shapes()
@@ -260,7 +267,7 @@ class Window:
         running = True
         while running:
           
-            game.time.delay(4)
+            game.time.delay(2)
             key.key_bind()
             for event in game.event.get():
 
