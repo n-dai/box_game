@@ -51,6 +51,12 @@ class Window:
 
     score = 0
     score_deduct_time = time.time()
+
+    stage_count = 0
+    level_count = 0
+    level_it = 0
+    level_time = time.time()
+
     # Function to map rgb values to the closest colour names
     def convert_rgb_to_names(self, rgb_tuple):
     
@@ -156,7 +162,7 @@ class Window:
         self.screen.blit(instruction_text, (self.x_origin - int(5 * len(self.initial_text)), self.screen_min_height + 20))
     
     def countdown_display_init(self) :
-        game.font.init()
+        game.font.init()    
         instruction_font = game.font.SysFont("Comic Sans", 32)
         instruction_text = instruction_font.render("Time Remaining:  " + str(self.countdown_time), True, self.white)
         self.screen.blit(instruction_text, (self.screen_min_width + 20, self.screen_min_height + 20))
@@ -167,7 +173,20 @@ class Window:
         instruction_text = instruction_font.render("Score:  " + str(self.score), True, self.white)
         self.screen.blit(instruction_text, (self.screen_min_width + 20, self.screen_min_height + 50))
     
-    
+    def level_display_init(self):
+
+        game.font.init()
+        level_font = game.font.SysFont("Comic Sans", 32)
+        level_text = level_font.render("Level " + str(self.level_count), True, self.white)
+
+        if self.level_it != self.level_count:
+            self.level_time = time.time()
+            while int(time.time() - self.level_time) < 5:
+                self.screen.blit(level_text, (self.x_origin, self.y_origin))
+                self.level_it = self.level_count
+            
+
+
     # Function to handle the text displayed
     def instructions_display(self):
         
@@ -178,6 +197,7 @@ class Window:
                 self.initial_text = "Go to colour " + str(name_colour)
     
     def countdown_display(self):
+
         if key.initial_press > 0:
             if int(time.time() - self.current_time) != self.compared_time:
                 if self.countdown_time == 0:
@@ -187,7 +207,7 @@ class Window:
                 else:
                     self.countdown_time -= 1
                     self.compared_time += 1
-
+        
     # Function to handle the game over, if the player does not hit the desired square in time, the game will end    
     def game_over_display(self):
         
@@ -211,6 +231,10 @@ class Window:
             self.random_gen()
             self.random_shapes()
             self.score += 10
+            self.stage_count += 1
+
+            if self.stage_count % 3 == 0 and self.stage_count != 0:
+                self.level_count += 1
         
         # If object 2 or 3 is hit, the game will prompt wrong colour
         if (self.collision_detect() == 2 or self.collision_detect() == 3) and key.initial_press > 0:
@@ -250,6 +274,7 @@ class Window:
             box.countdown_display_init()
             box.instructions_display()
             box.score_display_init()
+            box.level_display_init()
             box.countdown_display()
             key.key_bind()
             box.collision_detect()
