@@ -145,18 +145,12 @@ class Window:
         if self.x_direction > random_x_3 - 10  and self.x_direction < random_x_3 + 30 : 
             if self.y_direction > random_y_3 - 10  and self.y_direction < random_y_3 + 30:
                 return 3
-        
-    shape_1_hit_count = 0
-    shape_2_hit_count = 0
-    shape_3_hit_count = 0
 
     def random_shapes(self):
 
         game.draw.rect(self.screen, ((rgb_r_1, rgb_g_1, rgb_b_1)), [random_x_1, random_y_1, 20, 20])
         game.draw.rect(self.screen, ((rgb_r_2, rgb_g_2, rgb_b_2)), [random_x_2, random_y_2, 20, 20])
         game.draw.rect(self.screen, ((rgb_r_3, rgb_g_3, rgb_b_3)), [random_x_3, random_y_3, 20, 20])
-
-        #game.display.flip()
 
     # Function to iniliase the on-screen text
     def instructions_display_init(self):
