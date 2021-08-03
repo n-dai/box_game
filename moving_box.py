@@ -78,6 +78,7 @@ class Window:
     # Initialises pygame
     def pygame_init(self):
         game.init()
+        game.font.init()
 
     # Creates the main surface
     def window_create(self):
@@ -159,27 +160,26 @@ class Window:
 
     # Function to iniliase the on-screen text
     def instructions_display_init(self):
-        game.font.init()
-        instruction_font = game.font.SysFont("Comic Sans", 32)
+      
+        instruction_font = game.font.SysFont("calibri", 32)
         instruction_text = instruction_font.render(self.initial_text, True, self.white)
         self.screen.blit(instruction_text, (self.x_origin - int(5 * len(self.initial_text)), self.screen_min_height + 20))
     
     def countdown_display_init(self) :
-        game.font.init()    
-        instruction_font = game.font.SysFont("Comic Sans", 32)
+            
+        instruction_font = game.font.SysFont("calibri", 32)
         instruction_text = instruction_font.render("Time Remaining:  " + str(self.countdown_time), True, self.white)
         self.screen.blit(instruction_text, (self.screen_min_width + 20, self.screen_min_height + 20))
     
     def score_display_init(self) :
-        game.font.init()
-        instruction_font = game.font.SysFont("Comic Sans", 32)
+       
+        instruction_font = game.font.SysFont("calibri", 32)
         instruction_text = instruction_font.render("Score:  " + str(self.score), True, self.white)
         self.screen.blit(instruction_text, (self.screen_min_width + 20, self.screen_min_height + 50))
     
     def level_display_init(self):
 
-        game.font.init()
-        level_font = game.font.SysFont("Comic Sans", 32)
+        level_font = game.font.SysFont("calibri", 32)
         level_text = level_font.render("Level " + str(self.level_count), True, self.level_text_col)
         self.screen.blit(level_text, (self.x_origin, self.y_origin))           
         
@@ -232,13 +232,9 @@ class Window:
             self.score += 10
             self.stage_count += 1
 
-            if self.stage_count % 2 == 0 and self.stage_count != 0:
+            if self.stage_count % 3 == 0 and self.stage_count != 0:
                 self.level_count += 1
                 self.initial_time -= 1
-
-            # if self.level_monitor != self.level_count:
-            #     self.initial_time -= 3
-            #     self.level_monitor += 1
         
         # If object 2 or 3 is hit, the game will prompt wrong colour
         if (self.collision_detect() == 2 or self.collision_detect() == 3) and key.initial_press > 0:
@@ -263,7 +259,8 @@ class Window:
     
     # Function to handle the game loop
     def game_loop(self):
-        
+
+        box.window_create()
         running = True
         while running:
           
@@ -343,6 +340,4 @@ class Keyboard:
 box = Window()
 key = Keyboard()
 
-box.window_create()
-box.shape_create()
 box.game_loop()
